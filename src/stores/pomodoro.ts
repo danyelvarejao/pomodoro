@@ -6,8 +6,7 @@ import { DEFAULT_MINUTES_BY_POMODORO_TYPE, useSettingsStore } from '@/stores/set
 export enum TimerState {
   NOT_STARTED,
   STARTED,
-  PAUSED,
-  FINISHED
+  PAUSED
 }
 
 export enum PomodoroType {
@@ -104,10 +103,13 @@ export const usePomodoroStore = defineStore({
     },
 
     finish() {
-      this.setStartedAt(null)
-      this.setAmountSecondsPassed(0)
-      this.setTotalSeconds(0)
-      this.setState(TimerState.FINISHED)
+      if (this.type === PomodoroType.POMODORO) {
+        this.setType(PomodoroType.SHORT_BREAK)
+      } else {
+        this.setType(PomodoroType.POMODORO)
+      }
+
+      this.setState(TimerState.NOT_STARTED)
     },
 
     restart() {

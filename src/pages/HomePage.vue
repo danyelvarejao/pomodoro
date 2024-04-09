@@ -1,5 +1,5 @@
 <template>
-  <header>pomodoro</header>
+  <header>{{ APP_NAME }}</header>
 
   <nav>
     <div>
@@ -17,7 +17,7 @@
   </nav>
 
   <main>
-    <Timer />
+    <Timer @on-finish="updateSliderPosition" />
   </main>
 
   <footer>
@@ -35,16 +35,18 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import Timer from '@/components/Timer.vue'
 import { PomodoroType, usePomodoroStore } from '@/stores/pomodoro'
+import { APP_NAME } from '@/utils/constants'
 
 const pomodoroStore = usePomodoroStore()
 const slider = ref<HTMLSpanElement | null>(null)
 
 const selectPomodoroType = (type: PomodoroType) => {
   pomodoroStore.setType(type)
-  moveSlider()
+
+  updateSliderPosition()
 }
 
-const moveSlider = (useTransition: boolean = true) => {
+const updateSliderPosition = (useTransition: boolean = true) => {
   const sliderElement = slider.value
   if (!sliderElement) {
     return
@@ -65,13 +67,13 @@ const moveSlider = (useTransition: boolean = true) => {
 }
 
 onMounted(() => {
-  moveSlider(false)
+  updateSliderPosition(false)
 
-  window.addEventListener('resize', () => moveSlider(false))
+  window.addEventListener('resize', () => updateSliderPosition(false))
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', () => moveSlider(false))
+  window.removeEventListener('resize', () => updateSliderPosition(false))
 })
 </script>
 

@@ -1,10 +1,7 @@
 <template>
   <div class="timer-wrapper" @click="handleTimerAction">
     <div class="timer-container">
-      <div
-        class="progress-container"
-        :style="{ '--progress': progressPercentage === 0 ? '100' : progressPercentage }"
-      >
+      <div class="progress-container" :style="{ '--progress': progressPercentage }">
         <div class="content">
           <div class="time">
             <span>{{ remainingTime.minutes[0] }}</span>
@@ -18,7 +15,6 @@
             <span v-if="pomodoroStore.state === TimerState.NOT_STARTED">START</span>
             <span v-if="pomodoroStore.state === TimerState.STARTED">PAUSE</span>
             <span v-if="pomodoroStore.state === TimerState.PAUSED">RESUME</span>
-            <span v-if="pomodoroStore.state === TimerState.FINISHED">RESTART</span>
           </div>
         </div>
       </div>
@@ -27,15 +23,23 @@
 </template>
 
 <script lang="ts" setup>
+const emit = defineEmits(['onFinish'])
+
 import { differenceInSeconds } from 'date-fns'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 
 import { TimerState, usePomodoroStore } from '@/stores/pomodoro'
+import { APP_NAME, AUDIOS_VOLUME } from '@/utils/constants'
+
+const buttonPressAudio = new Audio('sounds/button-press.wav')
+const alarmAudio = new Audio('sounds/alarm.mp3')
+
+buttonPressAudio.volume = alarmAudio.volume = AUDIOS_VOLUME
 
 const pomodoroStore = usePomodoroStore()
 
 const remainingTime = computed(() => {
-  const currentSeconds = pomodoroStore.totalSeconds - pomodoroStore.amountSecondsPassed
+  const currentSeconds = Math.max(0, pomodoroStore.totalSeconds - pomodoroStore.amountSecondsPassed)
 
   const minutesAmount = Math.floor(currentSeconds / 60)
   const secondsAmount = currentSeconds % 60
@@ -49,9 +53,19 @@ const remainingTime = computed(() => {
   }
 })
 
-// FIXME: Implement progress percentage
+watch(
+  () => remainingTime.value,
+  () => {
+    document.title = `${remainingTime.value.minutes}:${remainingTime.value.seconds} - ${APP_NAME}`
+  }
+)
+
 const progressPercentage = computed(() => {
-  return 0
+  if (pomodoroStore.state === TimerState.NOT_STARTED) {
+    return 100
+  }
+
+  return (pomodoroStore.amountSecondsPassed / pomodoroStore.totalSeconds) * 100
 })
 
 const handleTimerAction = () => {
@@ -61,9 +75,9 @@ const handleTimerAction = () => {
     pomodoroStore.pause()
   } else if (pomodoroStore.state === TimerState.PAUSED) {
     pomodoroStore.resume()
-  } else if (pomodoroStore.state === TimerState.FINISHED) {
-    pomodoroStore.restart()
   }
+
+  buttonPressAudio.play()
 }
 
 let intervalId: number
@@ -75,8 +89,10 @@ onMounted(() => {
         differenceInSeconds(new Date(), pomodoroStore.startedAt || 0)
       )
 
-      if (pomodoroStore.amountSecondsPassed >= pomodoroStore.totalSeconds) {
+      if (pomodoroStore.amountSecondsPassed > pomodoroStore.totalSeconds) {
         pomodoroStore.finish()
+        alarmAudio.play()
+        emit('onFinish')
       }
     }
   }, 1000)
@@ -136,7 +152,7 @@ onUnmounted(() => {
   height: 100%;
 
   background: conic-gradient(var(--app-color) calc(var(--progress) * 1%), transparent 0deg);
-  transition: 0.4s ease-out reverse;
+  transition: background 0.4s ease-out; /* Removed 'reverse' */
   transition-property: background, color, width;
 
   border-radius: inherit;
