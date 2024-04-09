@@ -1,5 +1,5 @@
 <template>
-  <header>{{ APP_NAME }}</header>
+  <header>{{ APP_NAME.toLowerCase() }}</header>
 
   <nav>
     <div>
