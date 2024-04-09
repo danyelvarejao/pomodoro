@@ -1,0 +1,36 @@
+:root {
+  --color-red: #f87070;
+  --color-blue: #70f3f8;
+  --color-pink: #d881f8;
+  --color-very-light-gray: #636984;
+  --color-light-gray: #eff1fa;
+  --color-gray: #d7e0ff;
+  --color-dark-blue: #1e213f;
+  --color-very-dark-blue: #161932;
+  --color-white: #ffffff;
+}
+
+html {
+  font-size: 62.5%;
+
+  --app-font: 'Kumbh Sans', sans-serif;
+  --app-color: var(--color-red);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--app-font);
+  font-size: 1.6rem;
+  color: var(--color-gray);
+
+  background-color: var(--color-dark-blue);
+}
+
+#app {
+  min-height: 100vh;
+}
