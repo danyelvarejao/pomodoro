@@ -51,7 +51,5 @@ export const useSettingsStore = defineStore({
     }
   },
 
-  persist: {
-    storage: sessionStorage
-  }
+  persist: true
 })

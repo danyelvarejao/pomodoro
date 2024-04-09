@@ -120,7 +120,5 @@ export const usePomodoroStore = defineStore({
     }
   },
 
-  persist: {
-    storage: sessionStorage
-  }
+  persist: true
 })
